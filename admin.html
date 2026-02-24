@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="si">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 <style>
 body{
     margin:0;
-    font-family:Arial;
+    font-family:Arial, sans-serif;
     background:#000;
     color:white;
     padding:20px;
@@ -20,6 +20,11 @@ body{
     background:#111;
     padding:20px;
     border-radius:10px;
+    box-shadow:0 0 10px rgba(255,255,255,0.1);
+}
+
+h2, h3{
+    text-align:center;
 }
 
 input{
@@ -28,6 +33,7 @@ input{
     margin:8px 0;
     border:none;
     border-radius:5px;
+    box-sizing:border-box;
 }
 
 button{
@@ -39,6 +45,11 @@ button{
     color:white;
     font-weight:bold;
     cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#ff1f1f;
 }
 
 .movie{
@@ -48,40 +59,46 @@ button{
     margin-top:10px;
     display:flex;
     justify-content:space-between;
+    align-items:center;
+}
+
+.delete{
+    cursor:pointer;
 }
 </style>
 </head>
 <body>
 
 <div class="login-box" id="loginBox">
-    <h2>Admin Login</h2>
-    <input type="password" id="password" placeholder="Enter Password">
+    <h2>පරිපාලක පිවිසුම</h2>
+    <input type="password" id="password" placeholder="මුරපදය ඇතුළත් කරන්න">
     <button onclick="login()">Login</button>
 </div>
 
 <div class="panel" id="adminPanel" style="display:none;">
-    <h2>Admin Panel</h2>
+    <h2>පරිපාලක පැනලය</h2>
 
-    <input type="text" id="title" placeholder="Movie Title">
-    <input type="text" id="price" placeholder="Price">
+    <input type="text" id="title" placeholder="චිත්‍රපට නම">
+    <input type="text" id="price" placeholder="මිල">
 
-    <button onclick="addMovie()">Add Movie</button>
+    <button onclick="addMovie()">චිත්‍රපටය එක් කරන්න</button>
 
-    <h3>Movie List</h3>
+    <h3>චිත්‍රපට ලැයිස්තුව</h3>
     <div id="movieList"></div>
 </div>
 
 <script>
-const ADMIN_PASSWORD = "1234"; // change karapan
+const ADMIN_PASSWORD = "1234"; // මෙතන මුරපදය වෙනස් කරන්න
 
 function login(){
     const pass = document.getElementById("password").value;
+
     if(pass === ADMIN_PASSWORD){
         document.getElementById("loginBox").style.display = "none";
         document.getElementById("adminPanel").style.display = "block";
         loadMovies();
     } else {
-        alert("Wrong Password");
+        alert("වැරදි මුරපදය");
     }
 }
 
@@ -94,15 +111,26 @@ function saveMovies(movies){
 }
 
 function addMovie(){
-    const title = document.getElementById("title").value;
-    const price = document.getElementById("price").value;
+    const title = document.getElementById("title").value.trim();
+    const price = document.getElementById("price").value.trim();
 
     if(!title || !price){
-        alert("Fill all fields");
+        alert("සියලුම තොරතුරු ඇතුළත් කරන්න");
+        return;
+    }
+
+    if(isNaN(price)){
+        alert("මිල අංකයක් විය යුතුයි");
         return;
     }
 
     const movies = getMovies();
+
+    if(movies.some(m => m.title === title)){
+        alert("චිත්‍රපටය දැනටමත් ඇත");
+        return;
+    }
+
     movies.push({title, price});
     saveMovies(movies);
     loadMovies();
@@ -112,6 +140,8 @@ function addMovie(){
 }
 
 function deleteMovie(index){
+    if(!confirm("මෙම චිත්‍රපටය මකා දමන්නද?")) return;
+
     const movies = getMovies();
     movies.splice(index, 1);
     saveMovies(movies);
@@ -127,12 +157,17 @@ function loadMovies(){
     movies.forEach((movie, i)=>{
         list.innerHTML += `
             <div class="movie">
-                <span>${movie.title} - Rs. ${movie.price}</span>
-                <span onclick="deleteMovie(${i})" style="cursor:pointer;">❌</span>
+                <span>${movie.title} - රු. ${movie.price}</span>
+                <span class="delete" onclick="deleteMovie(${i})">❌</span>
             </div>
         `;
     });
 }
+
+// Enter key support
+document.getElementById("password").addEventListener("keypress", e => {
+    if (e.key === "Enter") login();
+});
 </script>
 
 </body>
